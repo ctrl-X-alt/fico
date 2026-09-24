@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, prod-ready-foundation]
   pull_request:
 jobs:
   test:
@@ -14,3 +14,4 @@ jobs:
           cache: npm
       - run: npm install
       - run: npm test
+      - run: npm run build -w apps/web
