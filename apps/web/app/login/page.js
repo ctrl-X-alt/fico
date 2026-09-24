@@ -1,0 +1,2 @@
+import{authStart}from"../../lib/api";
+export default function Login(){return <main className="shell"><nav className="nav"><a className="brand" href="/">Friction</a></nav><div className="card"><div className="eyebrow">Secure workspace</div><h1>Continue with Google.</h1><p className="lede">Your diagnostics stay private to your workspace.</p><a className="cta" href={authStart()}>Continue with Google</a></div></main>}
