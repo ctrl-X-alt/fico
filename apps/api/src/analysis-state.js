@@ -1,4 +1,1 @@
-const RUNNING=new Map(),TTL=Number(process.env.ANALYSIS_LOCK_TTL_MS||120000);
-function begin(id){const now=Date.now(),at=RUNNING.get(id);if(at&&now-at<TTL)return false;RUNNING.set(id,now);return true}
-function end(id){RUNNING.delete(id)}
-module.exports={begin,end};
+const RUNNING=new Map(),TTL=Number(process.env.ANALYSIS_LOCK_TTL_MS||120000);function begin(id){const now=Date.now(),at=RUNNING.get(id);if(at&&now-at<TTL)return false;RUNNING.set(id,now);return true}function end(id){RUNNING.delete(id)}module.exports={begin,end};
