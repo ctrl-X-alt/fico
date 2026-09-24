@@ -1,0 +1,6 @@
+[
+{"name":"small-drop-healthy","input":{"business":{"name":"Demo"},"onboarding":{"goal":"activate","activation":"activated"},"funnel":{"steps":[{"name":"Signup","users":100},{"name":"Activated","users":95}]}},"expected_status":"no_meaningful_friction_established"},
+{"name":"large-drop-no-cause","input":{"business":{"name":"Demo"},"onboarding":{"goal":"activate","activation":"activated"},"funnel":{"steps":[{"name":"Signup","users":100},{"name":"Setup","users":40}]}},"expected_status":"potential_friction"},
+{"name":"technical-signal","input":{"business":{"name":"Demo"},"onboarding":{"goal":"activate","activation":"activated"},"funnel":{"steps":[{"name":"Signup","users":100},{"name":"Setup","users":40}]},"context":{"notes":"timeout errors reported"}},"expected_status":"technical_cause_possible"},
+{"name":"delayed-activation","input":{"business":{"name":"Demo"},"onboarding":{"goal":"activate later","activation":"activated"},"funnel":{"steps":[{"name":"Signup","users":100},{"name":"Setup","users":40}]},"context":{"delayedActivation":true}},"expected_status":"delayed_activation_possible"}
+]
