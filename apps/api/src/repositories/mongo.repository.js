@@ -1,7 +1,9 @@
 const { MongoClient } = require("mongodb");
 
 class MongoRepository {
-  constructor(uri, dbName = "fico") { this.uri = uri; this.dbName = dbName; this.client = null; this.db = null; }
+  constructor(uri, dbName = "fico") {
+    this.uri = uri; this.dbName = dbName; this.client = null; this.db = null;
+  }
   async connect() {
     if (this.db) return this.db;
     this.client = new MongoClient(this.uri, {
@@ -26,25 +28,31 @@ class MongoRepository {
   users() { return this.db.collection("users"); }
   usage() { return this.db.collection("usage"); }
   async createAnalysis(item) { await this.analyses().insertOne({ ...item, _id: item.id }); return item; }
-  async getAnalysis(id, ownerId) { return this.analyses().findOne({ _id: id, ownerId }); }
-  async listAnalyses(ownerId) { return this.analyses().find({ ownerId }).sort({ createdAt: -1 }).toArray(); }
+  async getAnalysis(id, ownerId) { return this.analyses().findOne({ _id: id, ownerId }, { projection: { _id: 0 } }); }
+  async listAnalyses(ownerId) { return this.analyses().find({ ownerId }, { projection: { _id: 0 } }).sort({ createdAt: -1 }).toArray(); }
   async updateAnalysis(id, ownerId, patch) {
-    const result = await this.analyses().findOneAndUpdate({ _id: id, ownerId }, { $set: patch }, { returnDocument: "after" });
-    return result.value;
+    return this.analyses().findOneAndUpdate(
+      { _id: id, ownerId }, { $set: patch },
+      { returnDocument: "after", projection: { _id: 0 } }
+    );
   }
   async consumeUsage(userId, period, limit = 2) {
-    const filter = { userId, period, $or: [{ used: { $lt: limit } }, { used: { $exists: false } }] };
     const now = new Date().toISOString();
-    const result = await this.usage().findOneAndUpdate(
-      filter,
-      { $inc: { used: 1 }, $set: { updatedAt: now }, $setOnInsert: { userId, period, limit, createdAt: now } },
-      { upsert: true, returnDocument: "after" }
+    const existing = await this.usage().findOneAndUpdate(
+      { userId, period, used: { $lt: limit } },
+      { $inc: { used: 1 }, $set: { updatedAt: now, limit } },
+      { returnDocument: "after", projection: { _id: 0 } }
     );
-    if (result.value) {
-      const used = result.value.used;
-      return { allowed: used <= limit, used, limit, remaining: Math.max(0, limit - used), period };
+    if (existing) {
+      return { allowed: true, used: existing.used, limit, remaining: Math.max(0, limit - existing.used), period };
     }
-    const current = await this.usage().findOne({ userId, period });
+    try {
+      await this.usage().insertOne({ userId, period, used: 1, limit, createdAt: now, updatedAt: now });
+      return { allowed: true, used: 1, limit, remaining: limit - 1, period };
+    } catch (e) {
+      if (e?.code !== 11000) throw e;
+    }
+    const current = await this.usage().findOne({ userId, period }, { projection: { _id: 0 } });
     const used = current?.used || 0;
     return { allowed: false, used, limit, remaining: Math.max(0, limit - used), period };
   }
