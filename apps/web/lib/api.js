@@ -8,3 +8,4 @@ export const listAnalyses=()=>request("/analyses");
 export const getUsage=()=>request("/usage");
 export const getReportHtml=x=>request("/analyses/"+id(x)+"/report.html");
 export const reportUrl=x=>base+"/analyses/"+id(x)+"/report.html";
+export const pdfUrl=x=>base+"/analyses/"+id(x)+"/pdf";
