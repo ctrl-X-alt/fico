@@ -4,20 +4,21 @@
 
 Evidence-led onboarding diagnosis for separating observed funnel behavior from hypotheses, missing evidence and recommendations.
 
-## Current production foundation
-- persistent repository interface with MongoDB Atlas support and development memory fallback
-- owner-scoped analyses and monthly usage limit of 2 analyses
-- deterministic funnel validation and uncertainty-aware diagnosis primitives
-- AI/vision provider adapter with timeout and structured JSON
-- knowledge retrieval boundary
-- secure HTTP defaults and input IDs
-- report HTML boundary
-- module and API integration tests
+## Production foundation
+- MongoDB Atlas persistence with owner-scoped records and atomic monthly quota reservations/refunds
+- private object-storage adapter with local development fallback, upload size/type/signature validation
+- deterministic diagnostic pipeline that treats drops as signals and preserves uncertainty
+- screenshot vision stage fused into diagnosis before reasoning
+- isolated, untrusted-data prompt boundary and bounded AI retries/timeouts
+- HttpOnly session authentication path and private report delivery
+- rate limiting, readiness checks, request IDs and secure HTTP defaults
+- dynamic HTML report and Playwright PDF rendering
+- unit, integration and scenario evaluation coverage
 
-Credentials are intentionally environment-driven and added later.
+Credentials remain environment-driven and are intentionally not committed.
 
-## Development
-Node.js 20+. `npm install`, then run API and web workspaces.
+## Run
+Node.js 20+. Install dependencies, then run the API and web workspaces.
 
-## Production completion still requires
-Real authentication/OAuth, object storage, image upload/vision pipeline, semantic vector retrieval, PDF/Chromium rendering, frontend upload/report UX, observability and deployment wiring.
+## Required production environment
+See `apps/api/.env.example`. Production requires MongoDB, authentication secrets, an AI provider, and object storage credentials.
