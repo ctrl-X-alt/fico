@@ -2,11 +2,12 @@ const express=require("express"),crypto=require("node:crypto");
 const {validateAnalysisInput,validateDiagnosis}=require("@fico/core");
 const {analyses:memoryAnalyses,usage:memoryUsage}=require("./repositories/memory.repository");
 const {checkAndConsumeMemory,monthKey}=require("./usage");
-const {renderReport}=require("./report.service");
+const {renderReport,renderPdf}=require("./report.service");
 const {requireAuth}=require("./auth");
 const {getRepository}=require("./repository");
 const {buildDiagnostic}=require("./diagnosis.service");
 const {safeId}=require("./security");
+const {begin,end}=require("./analysis-state");
 const router=express.Router(),repo=()=>getRepository();
 const memoryGet=(id,ownerId)=>{const a=memoryAnalyses.get(id);return a&&a.ownerId===ownerId?a:null};
 async function createStore(item){if(repo().kind==="mongo")return repo().mongo.createAnalysis(item);memoryAnalyses.set(item.id,item);return item}
@@ -21,6 +22,7 @@ router.post("/analyses",async(q,r,next)=>{try{const input=q.body||{},v=validateA
 router.get("/analyses",async(q,r,n)=>{try{r.json(await listStore(q.userId))}catch(e){n(e)}});
 router.get("/usage",async(q,r,n)=>{try{r.json(await usageStore(q.userId))}catch(e){n(e)}});
 router.get("/analyses/:id",async(q,r,n)=>{try{const id=safeId(q.params.id);if(!id)return r.status(400).json({error:"invalid_analysis_id"});const a=await getStore(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});r.json(a)}catch(e){n(e)}});
-router.post("/analyses/:id/run",async(q,r,n)=>{try{const id=safeId(q.params.id);if(!id)return r.status(400).json({error:"invalid_analysis_id"});const a=await getStore(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});if(a.status==="completed")return r.status(409).json({error:"analysis_already_completed"});const quota=await consumeUsage(q.userId,2);if(!quota.allowed)return r.status(429).json({error:"monthly_limit_reached",limit:2,used:quota.used});let result;try{result=await buildDiagnostic(a.input)}catch(e){return r.status(502).json({error:"diagnosis_failed",message:e.code||"provider_error"})}const check=validateDiagnosis(result);if(!check.valid)return r.status(422).json({error:"invalid_diagnosis_output",details:check.errors});const updated=await updateStore(a.id,q.userId,{status:"completed",result,completedAt:new Date().toISOString(),usage:quota});r.json(updated||{...a,status:"completed",result,usage:quota})}catch(e){n(e)}});
+router.post("/analyses/:id/run",async(q,r,n)=>{let started=false;try{const id=safeId(q.params.id);if(!id)return r.status(400).json({error:"invalid_analysis_id"});const a=await getStore(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});if(a.status==="completed")return r.status(409).json({error:"analysis_already_completed"});if(!begin(id))return r.status(409).json({error:"analysis_already_running"});started=true;const quota=await consumeUsage(q.userId,2);if(!quota.allowed)return r.status(429).json({error:"monthly_limit_reached",limit:2,used:quota.used});const result=await buildDiagnostic(a.input);const check=validateDiagnosis(result);if(!check.valid)return r.status(422).json({error:"invalid_diagnosis_output",details:check.errors});const updated=await updateStore(a.id,q.userId,{status:"completed",result,completedAt:new Date().toISOString(),usage:quota});r.json(updated||{...a,status:"completed",result,usage:quota})}catch(e){n(e)}finally{if(started)end(q.params.id)}});
 router.get("/analyses/:id/report.html",async(q,r,n)=>{try{const id=safeId(q.params.id);if(!id)return r.status(400).json({error:"invalid_analysis_id"});const a=await getStore(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});if(!a.result)return r.status(409).json({error:"analysis_not_completed"});r.type("html").set("Content-Disposition",'inline; filename="friction-report.html"').send(await renderReport(a))}catch(e){n(e)}});
+router.get("/analyses/:id/pdf",async(q,r,n)=>{try{const id=safeId(q.params.id);if(!id)return r.status(400).json({error:"invalid_analysis_id"});const a=await getStore(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});if(!a.result)return r.status(409).json({error:"analysis_not_completed"});const pdf=await renderPdf(a);r.type("application/pdf").set("Content-Disposition",'attachment; filename="friction-diagnostic.pdf"').send(pdf)}catch(e){if(e.code==="pdf_renderer_unavailable")return r.status(503).json({error:e.code});n(e)}});
 module.exports=router;
