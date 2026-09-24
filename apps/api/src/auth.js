@@ -1,19 +1,8 @@
-const crypto = require("node:crypto");
-
-function getUser(req) {
-  const id = req.headers["x-user-id"];
-  if (process.env.NODE_ENV === "production" && !id) return null;
-  return id ? String(id).slice(0, 128) : "local-user";
-}
-function requireAuth(req, res, next) {
-  const userId = getUser(req);
-  if (!userId) return res.status(401).json({ error: "authentication_required" });
-  req.userId = userId;
-  next();
-}
-function signLocalToken(payload, secret) {
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  return body+"."+sig;
-}
-module.exports = { getUser, requireAuth, signLocalToken };
+const crypto=require("node:crypto");
+const {getRepository}=require("./repository");
+function sign(payload,secret){const body=Buffer.from(JSON.stringify(payload)).toString("base64url");const sig=crypto.createHmac("sha256",secret).update(body).digest("base64url");return body+"."+sig}
+function verify(token,secret){const [body,sig]=String(token||"").split(".");if(!body||!sig)return null;const expected=crypto.createHmac("sha256",secret).update(body).digest("base64url");const a=Buffer.from(sig),b=Buffer.from(expected);if(a.length!==b.length||!crypto.timingSafeEqual(a,b))return null;let p;try{p=JSON.parse(Buffer.from(body,"base64url").toString())}catch{return null}if(p.exp&&Date.now()/1000>p.exp)return null;return p}
+function getUser(req){const token=(req.headers.authorization||"").replace(/^Bearer\s+/i,"");if(token&&process.env.AUTH_SECRET){const p=verify(token,process.env.AUTH_SECRET);if(p?.sub)return String(p.sub).slice(0,128)}const id=req.headers["x-user-id"];if(process.env.NODE_ENV==="production")return null;return id?String(id).slice(0,128):"local-user"}
+function requireAuth(req,res,next){const id=getUser(req);if(!id)return res.status(401).json({error:"authentication_required"});req.userId=id;next()}
+async function signInWithGoogle(code){const {GOOGLE_CLIENT_ID:id,GOOGLE_CLIENT_SECRET:secret,GOOGLE_REDIRECT_URI:redirect}=process.env;if(!id||!secret||!redirect)throw Object.assign(new Error("google_oauth_not_configured"),{code:"google_oauth_not_configured"});const tr=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({code,client_id:id,client_secret:secret,redirect_uri:redirect,grant_type:"authorization_code"})});if(!tr.ok)throw Object.assign(new Error("google_token_exchange_failed"),{code:"google_token_exchange_failed"});const t=await tr.json();if(!t.access_token)throw Object.assign(new Error("google_access_token_missing"),{code:"google_access_token_missing"});const ur=await fetch("https://www.googleapis.com/oauth2/v3/userinfo",{headers:{Authorization:"Bearer "+t.access_token}});if(!ur.ok)throw Object.assign(new Error("google_userinfo_failed"),{code:"google_userinfo_failed"});const p=await ur.json(),now=new Date().toISOString(),user={id:String(p.sub),email:p.email||null,name:p.name||null,picture:p.picture||null,updatedAt:now},rp=getRepository();if(rp.kind==="mongo")await rp.mongo.users().updateOne({id:user.id},{$set:user,$setOnInsert:{createdAt:now}},{upsert:true});else rp.memory.users.set(user.id,{...(rp.memory.users.get(user.id)||{}),...user});if(!process.env.AUTH_SECRET)throw Object.assign(new Error("auth_secret_not_configured"),{code:"auth_secret_not_configured"});return{token:sign({sub:user.id,iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+604800},process.env.AUTH_SECRET),user}}
+module.exports={getUser,requireAuth,signInWithGoogle};
