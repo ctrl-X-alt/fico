@@ -1,0 +1,1 @@
+const {analyzeFunnel}=require("./funnel");const {diagnose}=require("./diagnosis");module.exports={analyzeFunnel,diagnose};
