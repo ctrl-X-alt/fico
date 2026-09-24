@@ -19,7 +19,8 @@ class MongoRepository {
       this.analyses().createIndex({ ownerId: 1, id: 1 }, { unique: true }),
       this.users().createIndex({ id: 1 }, { unique: true }),
       this.users().createIndex({ email: 1 }, { unique: true, sparse: true }),
-      this.usage().createIndex({ userId: 1, period: 1 }, { unique: true })
+      this.usage().createIndex({ userId: 1, period: 1 }, { unique: true }),
+      this.analyses().createIndex({ status: 1, leaseExpiresAt: 1 })
     ]);
     return this.db;
   }
@@ -36,7 +37,7 @@ class MongoRepository {
       { returnDocument: "after", projection: { _id: 0 } }
     );
   }
-  async consumeUsage(userId, period, limit = 2) {
+  async reserveUsage(userId, period, limit = 2) {
     const now = new Date().toISOString();
     const existing = await this.usage().findOneAndUpdate(
       { userId, period, used: { $lt: limit } },
