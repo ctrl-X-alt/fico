@@ -2,25 +2,17 @@
 
 **Find friction. Fix onboarding.**
 
-Evidence-led onboarding diagnosis: business context + activation definition + funnel evidence + interface evidence → findings, hypotheses, confidence, recommendations, and next evidence.
+Evidence-led onboarding diagnosis: business context + activation definition + funnel + interface evidence, with explicit uncertainty.
 
-## Current MVP
-- Next.js web app
-- Express API
-- deterministic funnel/diagnostic core
-- structured diagnosis validation and causal-language guardrails
-- versioned diagnostic knowledge base
-- monthly analysis usage enforcement
-- AI-compatible provider and basic retrieval adapters
-- report HTML builder
-- CI tests
+## Architecture
+- web: Next.js
+- api: Express
+- core: deterministic diagnosis primitives
+- persistence: MongoDB Atlas with an in-memory development fallback
+- knowledge: versioned Markdown knowledge base
 
-## Environment
-Copy `apps/api/.env.example` to `.env`. The app can run with the deterministic core without an AI key; MongoDB, object storage and AI integrations activate when configured.
+## Setup
+Node.js 20+. Run `npm install`, then start `npm run dev -w apps/api` and `npm run dev -w apps/web`.
+Copy `apps/api/.env.example` before adding credentials.
 
-## Development
-```bash
-npm install
-npm test
-npm run dev
-```
+Production requires real authentication, storage, AI/vision, PDF rendering, observability and deployment configuration; this branch prepares the persistence/API foundation without hardcoding secrets.
