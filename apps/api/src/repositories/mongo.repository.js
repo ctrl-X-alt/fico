@@ -40,22 +40,26 @@ class MongoRepository {
   async reserveUsage(userId, period, limit = 2) {
     const now = new Date().toISOString();
     const existing = await this.usage().findOneAndUpdate(
-      { userId, period, used: { $lt: limit } },
-      { $inc: { used: 1 }, $set: { updatedAt: now, limit } },
+      { userId, period, $expr: { $lt: [{ $add: [{ $ifNull: ["$used", 0] }, { $ifNull: ["$reserved", 0] }] }, limit] } },
+      { $inc: { reserved: 1 }, $set: { updatedAt: now, limit } },
       { returnDocument: "after", projection: { _id: 0 } }
     );
-    if (existing) {
-      return { allowed: true, used: existing.used, limit, remaining: Math.max(0, limit - existing.used), period };
-    }
+    if (existing) return { allowed: true, used: existing.used || 0, reserved: existing.reserved || 0, limit, remaining: Math.max(0, limit - (existing.used || 0) - (existing.reserved || 0)), period };
     try {
-      await this.usage().insertOne({ userId, period, used: 1, limit, createdAt: now, updatedAt: now });
-      return { allowed: true, used: 1, limit, remaining: limit - 1, period };
+      await this.usage().insertOne({ userId, period, used: 0, reserved: 1, limit, createdAt: now, updatedAt: now });
+      return { allowed: true, used: 0, reserved: 1, limit, remaining: limit - 1, period };
     } catch (e) {
       if (e?.code !== 11000) throw e;
     }
     const current = await this.usage().findOne({ userId, period }, { projection: { _id: 0 } });
-    const used = current?.used || 0;
-    return { allowed: false, used, limit, remaining: Math.max(0, limit - used), period };
+    const used = current?.used || 0, reserved = current?.reserved || 0;
+    return { allowed: false, used, reserved, limit, remaining: Math.max(0, limit - used - reserved), period };
   }
-}
+  async finalizeUsage(userId, periodOrReservation, success) {
+    const period = typeof periodOrReservation === "string" ? periodOrReservation : periodOrReservation.period;
+    const now = new Date().toISOString();
+    const update = success ? { $inc: { reserved: -1, used: 1 } } : { $inc: { reserved: -1 } };
+    const r = await this.usage().findOneAndUpdate({ userId, period, reserved: { $gt: 0 } }, { ...update, $set: { updatedAt: now } }, { returnDocument: "after", projection: { _id: 0 } });
+    return { allowed: true, used: r?.used || 0, reserved: r?.reserved || 0, limit: r?.limit || 2, remaining: Math.max(0, (r?.limit || 2) - (r?.used || 0) - (r?.reserved || 0)), period };
+  }}
 module.exports = { MongoRepository };
