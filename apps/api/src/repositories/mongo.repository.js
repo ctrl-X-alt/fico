@@ -61,5 +61,6 @@ class MongoRepository {
     const update = success ? { $inc: { reserved: -1, used: 1 } } : { $inc: { reserved: -1 } };
     const r = await this.usage().findOneAndUpdate({ userId, period, reserved: { $gt: 0 } }, { ...update, $set: { updatedAt: now } }, { returnDocument: "after", projection: { _id: 0 } });
     return { allowed: true, used: r?.used || 0, reserved: r?.reserved || 0, limit: r?.limit || 2, remaining: Math.max(0, (r?.limit || 2) - (r?.used || 0) - (r?.reserved || 0)), period };
-  }}
+  }
+}
 module.exports = { MongoRepository };
