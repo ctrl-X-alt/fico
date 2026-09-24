@@ -1,0 +1,1 @@
+const analyses=new Map();const usage=new Map();function key(user="local-user"){const d=new Date();return user+":"+d.getUTCFullYear()+"-"+(d.getUTCMonth()+1)}module.exports={analyses,getUsage:u=>usage.get(key(u))||0,canCreate:(u,l)=>((usage.get(key(u))||0)<l),consume:u=>{const k=key(u),n=(usage.get(k)||0)+1;usage.set(k,n);return n}};
