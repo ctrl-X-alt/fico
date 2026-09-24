@@ -1,3 +1,4 @@
-const TYPES=new Set(["image/png","image/jpeg","image/webp"]),MAX_SCREENSHOTS=20,MAX_SCREENSHOT_BYTES=8*1024*1024;
-function validateUpload(file){if(!file||!file.buffer)return{ok:false,error:"file_required"};if(!TYPES.has(file.mimetype))return{ok:false,error:"unsupported_image_type"};if(file.buffer.length>MAX_SCREENSHOT_BYTES)return{ok:false,error:"image_too_large"};return{ok:true}}
+const TYPES=new Set(['image/png','image/jpeg','image/webp']),MAX_SCREENSHOTS=20,MAX_SCREENSHOT_BYTES=8*1024*1024;
+function magic(buffer,type){if(type==='image/png')return buffer.length>=8&&buffer.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));if(type==='image/jpeg')return buffer.length>=3&&buffer.subarray(0,3).equals(Buffer.from([255,216,255]));if(type==='image/webp')return buffer.length>=12&&buffer.toString('ascii',0,4)==='RIFF'&&buffer.toString('ascii',8,12)==='WEBP';return false;}
+function validateUpload(file){if(!file?.buffer)return{ok:false,error:'file_required'};if(!TYPES.has(file.mimetype))return{ok:false,error:'unsupported_image_type'};if(file.buffer.length===0||file.buffer.length>MAX_SCREENSHOT_BYTES)return{ok:false,error:file.buffer.length===0?'empty_image':'image_too_large'};if(!magic(file.buffer,file.mimetype))return{ok:false,error:'image_signature_mismatch'};return{ok:true}}
 module.exports={MAX_SCREENSHOTS,MAX_SCREENSHOT_BYTES,validateUpload};
