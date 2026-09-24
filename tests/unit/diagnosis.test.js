@@ -1,0 +1,3 @@
+const test=require("node:test"),assert=require("node:assert/strict"),{runDiagnostic}=require("../../packages/core/src/diagnosticPipeline");
+test("diagnosis is uncertainty-aware",()=>{const r=runDiagnostic({business:{name:"Demo"},onboarding:{activation:"activated"},funnel:{steps:[{name:"Signup",users:100},{name:"Activated",users:50}]}});assert.equal(r.diagnosis_status,"potential_friction");assert.ok(r.next_evidence.length>=1);assert.ok(r.confidence.score>=0&&r.confidence.score<=100)});
+test("invalid input becomes data quality issue",()=>{const r=runDiagnostic({onboarding:{},funnel:{steps:[{name:"A",users:10},{name:"B",users:20}]}});assert.equal(r.diagnosis_status,"data_quality_issue")});

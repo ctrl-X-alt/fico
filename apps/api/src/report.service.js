@@ -1,1 +1,3 @@
-const{buildReportHtml}=require("@fico/core");async function renderReport(analysis){if(!analysis?.result)throw new Error("report_requires_completed_analysis");return buildReportHtml(analysis)}module.exports={renderReport};
+const {buildReportHtml}=require("@fico/core");
+async function renderReport(analysis){if(!analysis?.result)throw new Error("report_requires_completed_analysis");return buildReportHtml(analysis)}
+module.exports={renderReport};
