@@ -1,0 +1,3 @@
+const test=require("node:test"); const assert=require("node:assert/strict"); const {scoreConfidence}=require("../../packages/core/src/confidence");
+test("confidence stays in range",()=>{const r=scoreConfidence({evidenceCompleteness:1,dataQuality:1,contextClarity:1,agreement:1});assert.ok(r.score>=0&&r.score<=100);assert.equal(r.band,"high")});
+test("contradictions reduce confidence",()=>{const a=scoreConfidence({evidenceCompleteness:1,dataQuality:1,contextClarity:1,agreement:1,contradictions:1});const b=scoreConfidence({evidenceCompleteness:1,dataQuality:1,contextClarity:1,agreement:1});assert.ok(a.score<b.score)});

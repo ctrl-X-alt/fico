@@ -1,0 +1,3 @@
+const test=require("node:test"); const assert=require("node:assert/strict"); const {validateAnalysisInput}=require("../../packages/core/src/validator");
+test("rejects increasing funnel",()=>{const r=validateAnalysisInput({onboarding:{activation:"x"},funnel:{steps:[{name:"a",users:10},{name:"b",users:11}]}});assert.equal(r.valid,false);assert.match(r.errors[0],/more users/)});
+test("warns on missing business name",()=>{const r=validateAnalysisInput({onboarding:{activation:"x"}});assert.equal(r.valid,true);assert.ok(r.warnings.length)});
