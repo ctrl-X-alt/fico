@@ -1,3 +1,4 @@
 const {buildReportHtml}=require("@fico/core");
-async function renderReport(analysis){if(!analysis?.result)throw new Error("report_requires_completed_analysis");return buildReportHtml(analysis)}
-module.exports={renderReport};
+async function renderReport(analysis){if(!analysis?.result)throw Object.assign(new Error("report_requires_completed_analysis"),{code:"report_requires_completed_analysis"});return buildReportHtml(analysis)}
+async function renderPdf(analysis){const html=await renderReport(analysis);try{const {chromium}=require("playwright");const browser=await chromium.launch({headless:true});try{const page=await browser.newPage({viewport:{width:1240,height:1754}});await page.setContent(html,{waitUntil:"networkidle"});const pdf=await page.pdf({format:"A4",printBackground:true,preferCSSPageSize:true});return pdf}finally{await browser.close()}}catch(e){throw Object.assign(new Error("pdf_renderer_unavailable"),{code:"pdf_renderer_unavailable",cause:e})}}
+module.exports={renderReport,renderPdf};
