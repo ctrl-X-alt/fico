@@ -1,0 +1,2 @@
+"use client";import{useEffect}from"react";import{authMe}from"../../../lib/api";
+export default function Callback(){useEffect(()=>{const t=new URLSearchParams(location.search).get("token");if(t)localStorage.setItem("friction_auth_token",t);authMe().then(()=>location.href="/analysis/new").catch(()=>location.href="/login")},[]);return <main className="shell"><div className="card">Signing you in…</div></main>}
