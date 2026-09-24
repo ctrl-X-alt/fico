@@ -1,1 +1,0 @@
-import Link from "next/link";export default function Nav(){return <nav className="nav"><Link className="logo" href="/">FRICTION</Link><div className="links"><Link href="/history">History</Link><Link href="/analysis/new">New analysis</Link></div></nav>}
