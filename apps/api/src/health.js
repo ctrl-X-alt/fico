@@ -1,0 +1,1 @@
+const {getRepository}=require("./repository");async function readiness(){const rp=getRepository();if(rp.kind==="mongo")await rp.mongo.connect();return{ok:true,repository:rp.kind}}module.exports={readiness};
