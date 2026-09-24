@@ -1,0 +1,3 @@
+const {getAIProvider}=require("./ai/provider");
+async function analyzeScreenshots(_input,screenshots=[]){const provider=getAIProvider(),out=[];for(const s of screenshots){if(!process.env.AI_API_KEY){out.push({id:s.id,name:s.name,status:"unreviewed",facts:[],limitations:["Vision provider is not configured."]});continue;}if(!s.dataUrl){out.push({id:s.id,name:s.name,status:"unreviewed",facts:[],limitations:["Screenshot binary is unavailable."]});continue;}try{const r=await provider.analyzeImage({id:s.id,name:s.name,dataUrl:s.dataUrl});out.push({...r,id:s.id,name:s.name,status:r.status||"reviewed"});}catch(e){out.push({id:s.id,name:s.name,status:"failed",facts:[],limitations:["Screenshot analysis failed."]});}}return out;}
+module.exports={analyzeScreenshots};
