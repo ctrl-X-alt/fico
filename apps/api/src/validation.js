@@ -1,3 +1,3 @@
 const TYPES=new Set(["image/png","image/jpeg","image/webp"]),MAX_SCREENSHOTS=20,MAX_SCREENSHOT_BYTES=8*1024*1024;
-function validateUpload(file){if(!file?.buffer)return{ok:false,error:"file_required"};if(!TYPES.has(file.mimetype))return{ok:false,error:"unsupported_image_type"};if(file.buffer.length>MAX_SCREENSHOT_BYTES)return{ok:false,error:"image_too_large"};return{ok:true}}
+function validateUpload(file){if(!file||!file.buffer)return{ok:false,error:"file_required"};if(!TYPES.has(file.mimetype))return{ok:false,error:"unsupported_image_type"};if(file.buffer.length>MAX_SCREENSHOT_BYTES)return{ok:false,error:"image_too_large"};return{ok:true}}
 module.exports={MAX_SCREENSHOTS,MAX_SCREENSHOT_BYTES,validateUpload};
