@@ -1,2 +1,1 @@
-const test=require("node:test"),assert=require("node:assert/strict"),{begin,end}=require("../../apps/api/src/analysis-state");
-test("analysis run lock prevents concurrent duplicate execution",()=>{assert.equal(begin("x"),true);assert.equal(begin("x"),false);end("x");assert.equal(begin("x"),true);end("x")});
+const test=require("node:test"),assert=require("node:assert/strict"),{begin,end}=require("../../apps/api/src/analysis-state");test("analysis lock prevents overlap and releases",()=>{const id="x";assert.equal(begin(id),true);assert.equal(begin(id),false);end(id);assert.equal(begin(id),true);end(id)});
