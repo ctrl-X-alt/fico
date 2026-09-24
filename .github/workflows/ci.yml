@@ -1,16 +1,25 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, prod-ready-foundation]
   pull_request:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm install
-      - run: npm test
+      - name: Install dependencies
+        run: npm install
+      - name: Unit and integration tests
+        run: npm test
+      - name: API module smoke
+        run: node -e "require('./apps/api/src/server')"
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Web production build
+        run: npm run build -w apps/web

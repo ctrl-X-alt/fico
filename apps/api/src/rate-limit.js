@@ -1,0 +1,3 @@
+const buckets=new Map();
+function memoryRateLimit({windowMs=60000,max=60,keyFn=req=>req.ip}={}){return(req,res,next)=>{const key=String(keyFn(req)||"unknown"),now=Date.now(),b=buckets.get(key);if(!b||now-b.start>=windowMs){buckets.set(key,{start:now,count:1});res.setHeader("RateLimit-Limit",max);res.setHeader("RateLimit-Remaining",Math.max(0,max-1));return next()}b.count++;res.setHeader("RateLimit-Limit",max);res.setHeader("RateLimit-Remaining",Math.max(0,max-b.count));if(b.count>max)return res.status(429).json({error:"rate_limit_exceeded"});next()}}
+module.exports={rateLimit:memoryRateLimit,memoryRateLimit};

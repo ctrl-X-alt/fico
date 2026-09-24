@@ -1,0 +1,1 @@
+"use client";import{useEffect}from"react";import{authMe}from"../../../lib/api";export default function Callback(){useEffect(()=>{authMe().then(()=>location.replace("/analysis/new")).catch(()=>location.replace("/login"))},[]);return <main className="shell"><div className="card">Signing you in…</div></main>}

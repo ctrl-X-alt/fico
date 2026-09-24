@@ -1,0 +1,1 @@
+const test=require('node:test');const assert=require('node:assert/strict');const{retrieve}=require('../../apps/api/src/rag');test('retriever ranks overlapping knowledge',()=>{const docs=[{path:'a',text:'funnel dropoff activation evidence'},{path:'b',text:'colors typography'}];assert.equal(retrieve(docs,'funnel activation',1)[0].path,'a')});

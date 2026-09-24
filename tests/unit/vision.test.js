@@ -1,0 +1,2 @@
+const test=require("node:test"),assert=require("node:assert/strict"),{analyzeScreenshots}=require("../../apps/api/src/diagnosis.service.vision");
+test("vision degrades safely without provider",async()=>{const old=process.env.AI_API_KEY;delete process.env.AI_API_KEY;const r=await analyzeScreenshots({},[{id:"s1",name:"one"}]);assert.equal(r[0].status,"unreviewed");if(old===undefined)delete process.env.AI_API_KEY;else process.env.AI_API_KEY=old});

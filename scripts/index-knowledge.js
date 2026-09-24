@@ -1,0 +1,2 @@
+const {initRepository}=require("../apps/api/src/repository"),{getRepository}=require("../apps/api/src/repository"),{indexKnowledge}=require("../apps/api/src/knowledge-index");
+(async()=>{try{await initRepository();const rp=getRepository();if(rp.kind!=="mongo")throw new Error("mongo_required");const out=await indexKnowledge(rp.mongo,process.env.KNOWLEDGE_ROOT||"./knowledge");console.log(JSON.stringify(out));process.exit(0)}catch(e){console.error(e.message);process.exit(1)}})();

@@ -1,0 +1,3 @@
+const {loadKnowledge,ingestMongo}=require("./rag");const {getAIProvider}=require("./ai/provider");
+async function indexKnowledge(repo,root){const docs=await loadKnowledge(root);if(!process.env.AI_API_KEY||!process.env.AI_EMBEDDING_MODEL)throw new Error("embedding_provider_not_configured");const provider=getAIProvider();await ingestMongo(repo,docs,t=>provider.embed(t));return{indexed:docs.length}}
+module.exports={indexKnowledge};

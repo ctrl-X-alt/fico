@@ -1,3 +1,3 @@
-const test=require("node:test"); const assert=require("node:assert/strict"); const {validateAnalysisInput}=require("../../packages/core/src/validator");
-test("rejects increasing funnel",()=>{const r=validateAnalysisInput({onboarding:{activation:"x"},funnel:{steps:[{name:"a",users:10},{name:"b",users:11}]}});assert.equal(r.valid,false);assert.match(r.errors[0],/more users/)});
-test("warns on missing business name",()=>{const r=validateAnalysisInput({onboarding:{activation:"x"}});assert.equal(r.valid,true);assert.ok(r.warnings.length)});
+const test=require("node:test"),assert=require("node:assert/strict"),{validateAnalysisInput}=require("../../packages/core/src/validator");
+test("requires activation",()=>{const r=validateAnalysisInput({business:{name:"X"},funnel:{steps:[]}});assert.equal(r.valid,false);assert.match(r.errors[0],/activation/)});
+test("detects measurement-window mismatch",()=>{const r=validateAnalysisInput({onboarding:{activation:"x"},funnel:{steps:[],measurementWindow:"30d",previousMeasurementWindow:"7d"}});assert.equal(r.valid,true);assert.equal(r.warnings.length,1)});

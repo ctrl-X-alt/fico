@@ -1,1 +1,3 @@
-const test=require("node:test"),assert=require("node:assert/strict"),{analyzeFunnel}=require("../../packages/core/src/funnel");test("funnel math",()=>{const r=analyzeFunnel([{name:"A",users:100},{name:"B",users:60}]);assert.equal(r.steps[0].lost,40);assert.equal(r.steps[0].dropoff,.4)});test("invalid increasing counts",()=>assert.equal(analyzeFunnel([{name:"A",users:10},{name:"B",users:11}]).valid,false));
+const test=require("node:test"),assert=require("node:assert/strict"),{analyzeFunnel}=require("../../packages/core/src/funnel");
+test("calculates transition loss",()=>{const r=analyzeFunnel([{name:"Signup",users:100},{name:"Activated",users:40}]);assert.equal(r.largestDrop.rate,.6);assert.equal(r.largestDrop.lost,60)});
+test("rejects increasing counts",()=>{const r=analyzeFunnel([{name:"Signup",users:40},{name:"Activated",users:50}]);assert.equal(r.valid,false);assert.match(r.warnings[0],/Invalid/)});

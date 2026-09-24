@@ -1,7 +1,1 @@
-function scoreConfidence({inputValid=true,evidenceCompleteness=0.5,dataQuality=1,contextClarity=0.7,agreement=0.5,contradictions=0}){
-  let score=20+Math.max(0,Math.min(1,evidenceCompleteness))*30+Math.max(0,Math.min(1,dataQuality))*20+Math.max(0,Math.min(1,contextClarity))*15+Math.max(0,Math.min(1,agreement))*15-(Math.max(0,contradictions)*15);
-  if(!inputValid) score-=25;
-  score=Math.round(Math.max(0,Math.min(100,score)));
-  return {score,band:score>=80?"high":score>=60?"moderate":score>=40?"limited":"low",factors:{evidenceCompleteness,dataQuality,contextClarity,agreement,contradictions,inputValid}};
-}
-module.exports={scoreConfidence};
+function clamp(v){return Math.max(0,Math.min(1,Number(v)||0));}function scoreConfidence({inputValid=true,evidenceCompleteness=.5,dataQuality=1,contextClarity=.7,agreement=.5,contradictions=0}={}){let score=20+clamp(evidenceCompleteness)*30+clamp(dataQuality)*20+clamp(contextClarity)*15+clamp(agreement)*15-Math.min(30,Math.max(0,contradictions)*15);if(!inputValid)score-=25;score=Math.round(Math.max(0,Math.min(100,score)));return{score,band:score>=80?'high':score>=60?'moderate':score>=40?'limited':'low',factors:{evidenceCompleteness:clamp(evidenceCompleteness),dataQuality:clamp(dataQuality),contextClarity:clamp(contextClarity),agreement:clamp(agreement),contradictions:Math.max(0,Number(contradictions)||0),inputValid}};}module.exports={scoreConfidence};

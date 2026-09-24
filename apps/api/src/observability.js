@@ -1,0 +1,5 @@
+function redact(value){if(value===undefined||value===null)return value;if(typeof value==="string")return value.length>500?"[redacted-long]":value;if(Array.isArray(value))return value.slice(0,20).map(redact);if(typeof value==="object"){const out={};for(const [k,v] of Object.entries(value)){if(/token|secret|key|authorization|cookie|password|dataUrl|access_token/i.test(k))out[k]="[redacted]";else out[k]=redact(v)}return out}return value}
+function log(level,event,fields={}){const record={ts:new Date().toISOString(),level,event,...redact(fields)};process.stdout.write(JSON.stringify(record)+"\n")}
+function metrics(){const counts=new Map();return{inc(name){counts.set(name,(counts.get(name)||0)+1)},snapshot(){return Object.fromEntries(counts)}}}
+const metricStore=metrics();
+module.exports={redact,log,metricStore};
