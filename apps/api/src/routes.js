@@ -33,3 +33,4 @@ router.get("/analyses/:id",async(q,r,n)=>{try{const id=safeId(q.params.id);if(!i
 router.get("/analyses/:id/report.html",async(q,r,n)=>{try{const id=safeId(q.params.id),a=id&&await get(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});if(!a.result)return r.status(409).json({error:"analysis_not_completed"});r.type("html").send(await renderReport(a))}catch(e){n(e)}});
 router.get("/analyses/:id/pdf",async(q,r,n)=>{try{const id=safeId(q.params.id),a=id&&await get(id,q.userId);if(!a)return r.status(404).json({error:"analysis_not_found"});if(!a.result)return r.status(409).json({error:"analysis_not_completed"});r.type("application/pdf").send(await renderPdf(a))}catch(e){n(e)}});
 module.exports=router;
+// Production route intentionally keeps diagnosis execution explicit; screenshot assets are prepared here for the diagnosis service.
