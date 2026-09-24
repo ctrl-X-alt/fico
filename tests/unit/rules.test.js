@@ -1,0 +1,3 @@
+const test=require("node:test");const assert=require("node:assert/strict");const {validateDiagnosis}=require("../../packages/core/src/rules");
+test("accepts a valid diagnosis shape",()=>{const r=validateDiagnosis({diagnosis_status:"insufficient_evidence",confidence:{score:40},facts:[],hypotheses:[],uncertainties:[],findings:[],recommendations:[],next_evidence:[]});assert.equal(r.valid,true)});
+test("rejects invalid confidence",()=>{const r=validateDiagnosis({diagnosis_status:"insufficient_evidence",confidence:{score:140},facts:[],hypotheses:[],uncertainties:[],findings:[],recommendations:[],next_evidence:[]});assert.equal(r.valid,false)});

@@ -1,0 +1,2 @@
+# Conflicting evidence
+When funnel and screenshot evidence point in different directions, preserve both observations, lower confidence, explain the conflict, and request the evidence that can discriminate between hypotheses.

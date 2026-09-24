@@ -1,0 +1,2 @@
+# Funnel evidence
+A drop is an observed change between defined funnel steps. A large drop is a signal, not proof of friction. Interpret it with population, denominator, time window, path, and activation context.

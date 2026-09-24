@@ -1,0 +1,2 @@
+# Normal attrition
+Some abandonment is expected. A drop becomes diagnostically meaningful only in context: user intent, step necessity, activation relationship, benchmark or historical comparison, and supporting evidence.

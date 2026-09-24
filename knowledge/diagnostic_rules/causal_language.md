@@ -1,0 +1,2 @@
+# Causal language
+Use observed, consistent with, plausible, supported by, contradicted by, and unverified. Do not turn correlation, visual complexity, or largest-drop position into a causal claim without supporting evidence.

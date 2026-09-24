@@ -1,0 +1,2 @@
+# Screenshot evidence
+Screenshots support observations about visible UI: fields, required/optional signals, hierarchy, copy, actions, navigation, errors, progress, and visible complexity. A screenshot alone does not establish user confusion or causality.

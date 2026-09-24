@@ -1,0 +1,2 @@
+# Validation methods
+Prefer targeted validation: segment analysis, path comparison, event instrumentation, error logs, replay or support evidence when available, usability tests, and controlled experiments. Tie every recommendation to the uncertainty it is meant to resolve.

@@ -1,0 +1,2 @@
+# Data quality
+Check step order, non-negative counts, non-increasing counts, compatible denominators, consistent measurement windows, and matching populations. Surface ambiguity rather than silently repairing business data.
