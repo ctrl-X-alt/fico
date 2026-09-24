@@ -1,0 +1,2 @@
+const test=require("node:test"),assert=require("node:assert/strict"),{begin,end}=require("../../apps/api/src/analysis-state");
+test("analysis run lock prevents concurrent duplicate execution",()=>{assert.equal(begin("x"),true);assert.equal(begin("x"),false);end("x");assert.equal(begin("x"),true);end("x")});
