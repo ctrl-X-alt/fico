@@ -1,9 +1,1 @@
-function monthKey(d = new Date()) { return d.toISOString().slice(0, 7); }
-function checkAndConsumeMemory(usage, userId, limit = 2, now = new Date()) {
-  const key = userId + "::" + monthKey(now);
-  const used = usage.get(key) || 0;
-  if (used >= limit) return { allowed: false, used, limit, remaining: 0, period: monthKey(now) };
-  const next = used + 1; usage.set(key, next);
-  return { allowed: true, used: next, limit, remaining: limit - next, period: monthKey(now) };
-}
-module.exports = { monthKey, checkAndConsumeMemory };
+function monthKey(d=new Date()){return d.toISOString().slice(0,7)}function reserveMemory(usage,userId,limit=2,now=new Date()){const period=monthKey(now),key=userId+'::'+period,record=usage.get(key)||{used:0,reserved:0};if(record.used+record.reserved>=limit)return{allowed:false,used:record.used,reserved:record.reserved,limit,remaining:Math.max(0,limit-record.used-record.reserved),period};record.reserved+=1;usage.set(key,record);return{allowed:true,used:record.used,reserved:record.reserved,limit,remaining:Math.max(0,limit-record.used-record.reserved),period}}function finalizeMemory(usage,userId,reservation,success,now=new Date()){const period=reservation?.period||monthKey(now),key=userId+'::'+period,record=usage.get(key)||{used:0,reserved:0};record.reserved=Math.max(0,record.reserved-1);if(success)record.used+=1;usage.set(key,record);return{allowed:true,used:record.used,reserved:record.reserved,limit:reservation?.limit||2,remaining:Math.max(0,(reservation?.limit||2)-record.used-record.reserved),period}}function checkAndConsumeMemory(usage,userId,limit=2,now=new Date()){const r=reserveMemory(usage,userId,limit,now);return r.allowed?finalizeMemory(usage,userId,r,true,now):r}module.exports={monthKey,reserveMemory,finalizeMemory,checkAndConsumeMemory};
