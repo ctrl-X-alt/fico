@@ -1,5 +1,1 @@
-const crypto=require("node:crypto");
-const MAX_ID_LENGTH=128;
-function requestId(){return crypto.randomUUID();}
-function safeId(value){return typeof value==="string"&&value.length>0&&value.length<=MAX_ID_LENGTH&&/^[A-Za-z0-9._:-]+$/.test(value)?value:null;}
-module.exports={requestId,safeId};
+const crypto=require("node:crypto");const MAX_ID_LENGTH=128;const requestId=()=>crypto.randomUUID();function safeId(v){return typeof v==="string"&&v.length>0&&v.length<=MAX_ID_LENGTH&&/^[A-Za-z0-9._:-]+$/.test(v)?v:null}function timingSafeEqualString(a,b){const x=Buffer.from(String(a||"")),y=Buffer.from(String(b||""));return x.length===y.length&&crypto.timingSafeEqual(x,y)}module.exports={requestId,safeId,timingSafeEqualString};
