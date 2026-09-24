@@ -7,3 +7,4 @@ async function retrieveMongo(repo,input,k=8){if(!process.env.KNOWLEDGE_VECTOR_IN
 async function retrieve(repoOrDocs,input,k=8){if(repoOrDocs?.knowledge){const v=await retrieveMongo(repoOrDocs,input,k);if(v.length)return v;return lexical(await loadKnowledge(process.env.KNOWLEDGE_ROOT||"../../knowledge"),JSON.stringify(input),k)}return lexical(repoOrDocs,JSON.stringify(input),k)}
 async function ingestMongo(repo,docs,embed){for(const d of docs){const text=cleanText(d.text),id=crypto.createHash("sha256").update(d.path+"\n"+text).digest("hex");await repo.knowledge().updateOne({id},{$set:{id,path:d.path,text,sourceType:d.sourceType||"local",embedding:await embed(text),updatedAt:new Date()}},{upsert:true})}}
 module.exports={loadKnowledge,retrieve,ingestMongo,lexical};
+async function ingestKnowledgeFromDisk(repo,root,provider){const docs=await loadKnowledge(root),embed=t=>provider.embed(t);return ingestMongo(repo,docs,embed)}
