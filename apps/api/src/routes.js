@@ -1,0 +1,12 @@
+const express=require("express");
+const crypto=require("node:crypto");
+const {runDiagnostic}=require("@fico/core");
+const {analyses,usage}=require("./store");
+const router=express.Router();
+router.get("/health",(_req,res)=>res.json({ok:true,service:"fico-api"}));
+router.post("/analyses",(req,res)=>{const id=crypto.randomUUID(); const item={id,status:"draft",input:req.body||{},createdAt:new Date().toISOString()}; analyses.set(id,item); res.status(201).json(item);});
+router.get("/analyses",(req,res)=>res.json([...analyses.values()].sort((a,b)=>b.createdAt.localeCompare(a.createdAt))));
+router.get("/analyses/:id",(req,res)=>{const a=analyses.get(req.params.id); if(!a)return res.status(404).json({error:"analysis_not_found"}); res.json(a);});
+router.post("/analyses/:id/run",(req,res)=>{const a=analyses.get(req.params.id); if(!a)return res.status(404).json({error:"analysis_not_found"}); const key="local-user"; const used=usage.get(key)||0; if(used>=2)return res.status(429).json({error:"monthly_limit_reached",limit:2}); const result=runDiagnostic(a.input); a.status="completed"; a.result=result; a.completedAt=new Date().toISOString(); usage.set(key,used+1); res.json(a);});
+router.get("/usage",(_req,res)=>res.json({used:usage.get("local-user")||0,limit:2}));
+module.exports=router;

@@ -1,1 +1,10 @@
-const express=require("express"),{randomUUID}=require("crypto"),{diagnose}=require("@fico/core");const app=express();app.use(express.json({limit:"5mb"}));const db=new Map(),usage={n:0};app.get("/health",(_,r)=>r.json({ok:true}));app.post("/api/analyses",(q,r)=>{if(usage.n>=2)return r.status(429).json({error:"Monthly analysis limit reached"});const id=randomUUID();db.set(id,{id,createdAt:new Date().toISOString(),input:q.body,status:"draft"});usage.n++;r.status(201).json({id})});app.post("/api/analyses/:id/run",(q,r)=>{const a=db.get(q.params.id);if(!a)return r.status(404).json({error:"Analysis not found"});a.result=diagnose(a.input);a.status="completed";r.json(a.result)});app.get("/api/analyses/:id",(q,r)=>{const a=db.get(q.params.id);a?r.json(a):r.status(404).json({error:"Analysis not found"})});app.get("/api/history",(_,r)=>r.json([...db.values()]));app.listen(process.env.PORT||4000,()=>console.log("FICO API running"));
+const express=require("express");
+const cors=require("cors");
+const router=require("./routes");
+const app=express();
+app.use(cors());
+app.use(express.json({limit:"2mb"}));
+app.use("/api",router);
+app.use((err,_req,res,_next)=>{console.error(err);res.status(500).json({error:"internal_error"});});
+if(require.main===module){const port=process.env.PORT||4000;app.listen(port,()=>console.log("Friction API listening on "+port));}
+module.exports=app;
