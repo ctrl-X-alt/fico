@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="shell"><div className="card"><div className="eyebrow">Diagnosis</div><h2>Working through the evidence…</h2><p className="lede">Understanding your onboarding → validating funnel data → reviewing evidence → building the diagnosis.</p></div></main>}
