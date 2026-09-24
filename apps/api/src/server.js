@@ -6,5 +6,5 @@ app.use(express.json({limit:process.env.JSON_BODY_LIMIT||"2mb",strict:true}));
 app.get("/ready",async(_req,res)=>{try{res.json(await require("./health").readiness())}catch(e){res.status(503).json({ok:false})}});
 app.use("/api",rateLimit({windowMs:Number(process.env.RATE_LIMIT_WINDOW_MS||60000),max:Number(process.env.RATE_LIMIT_MAX||120)}),router);
 app.use((err,_req,res,_next)=>sendError(res,err));
-async function start(){assertConfig();await initRepository();const port=Number(process.env.PORT||4000);return app.listen(port,()=>log("info","server_started",{port,environment:process.env.NODE_ENV||"development"}))}
+async function start(){assertConfig();await initRepository();const stopMaintenance=await require("./repository").startMaintenance();const shutdown=async()=>{try{stopMaintenance();await require("./repository").closeRepository()}finally{process.exit(0)}};process.once("SIGTERM",shutdown);process.once("SIGINT",shutdown);const port=Number(process.env.PORT||4000);return app.listen(port,()=>log("info","server_started",{port,environment:process.env.NODE_ENV||"development"}))}
 if(require.main===module)start().catch(e=>{log("error","server_start_failed",{error:e.message});process.exit(1)});module.exports=app;module.exports.start=start;
