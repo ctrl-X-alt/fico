@@ -1,0 +1,1 @@
+const test=require("node:test");const assert=require("node:assert/strict");const{buildReportHtml}=require("../../packages/core/src/report");test("report escapes user content",()=>{const h=buildReportHtml({analysis:{input:{business:{name:"<x>"}}},result:{diagnosis_status:"insufficient_evidence"}});assert.ok(h.includes("&lt;x&gt;"));assert.ok(!h.includes("<x>"))});

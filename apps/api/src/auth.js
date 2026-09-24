@@ -1,0 +1,1 @@
+function getUser(req){return req.headers["x-user-id"]||"local-user"}function requireAuth(req,_res,next){req.userId=getUser(req);next()}module.exports={getUser,requireAuth};
