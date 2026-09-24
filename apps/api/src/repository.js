@@ -1,15 +1,6 @@
-const { MongoRepository } = require("./repositories/mongo.repository");
-const memory = require("./repositories/memory.repository");
-let state = { kind: "memory", memory, ready: false };
-async function initRepository() {
-  if (state.ready) return state;
-  if (process.env.MONGODB_URI) {
-    const mongo = new MongoRepository(process.env.MONGODB_URI, process.env.MONGODB_DB || "fico");
-    await mongo.connect();
-    state = { kind: "mongo", mongo, ready: true };
-  } else state.ready = true;
-  return state;
-}
-async function closeRepository() { if (state.kind === "mongo") await state.mongo.close(); state = { kind: "memory", memory, ready: false }; }
-function getRepository() { return state; }
-module.exports = { initRepository, closeRepository, getRepository };
+const {MongoRepository}=require("./repositories/mongo.repository");const memory=require("./repositories/memory.repository");let state={kind:"memory",memory,ready:false};
+async function initRepository(){if(state.ready)return state;if(process.env.MONGODB_URI){const mongo=new MongoRepository(process.env.MONGODB_URI,process.env.MONGODB_DB||"fico");await mongo.connect();state={kind:"mongo",mongo,ready:true}}else{state.ready=true}return state}
+async function startMaintenance(){const rp=getRepository();if(rp.kind!=="mongo")return()=>{};const run=async()=>{try{await rp.mongo.cleanupExpiredReservations();await rp.mongo.cleanupExpiredLeases()}catch(e){require("./observability").log("error","maintenance_failed",{error:e.code||e.message})}};await run();const timer=setInterval(run,300000);timer.unref();return()=>clearInterval(timer)}
+async function closeRepository(){if(state.kind==="mongo")await state.mongo.close();state={kind:"memory",memory,ready:false}}
+function getRepository(){return state}
+module.exports={initRepository,startMaintenance,closeRepository,getRepository};
