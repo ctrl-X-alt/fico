@@ -1,0 +1,3 @@
+const test=require("node:test"),assert=require("node:assert/strict"),{LocalStorageAdapter,cleanKey}=require("../../apps/api/src/storage"),fs=require("node:fs/promises"),path=require("node:path"),os=require("node:os");
+test("storage key rejects traversal",()=>assert.throws(()=>cleanKey("../secret"),/invalid_storage_key/));
+test("local storage round trip",async()=>{const root=await fs.mkdtemp(path.join(os.tmpdir(),"fico-"));const s=new LocalStorageAdapter(root);await s.put("analyses/a/x.txt",Buffer.from("ok"),"text/plain");assert.equal((await s.get("analyses/a/x.txt")).toString(),"ok");await s.delete("analyses/a/x.txt");await assert.rejects(s.get("analyses/a/x.txt"));await fs.rm(root,{recursive:true,force:true})});
